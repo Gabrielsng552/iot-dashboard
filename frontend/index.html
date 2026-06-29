@@ -1,1 +1,395 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<title>Dashboard IoT</title>
 
+<style>
+body {
+  margin: 0;
+  font-family: 'Segoe UI';
+  background: linear-gradient(180deg,#0f172a,#020617);
+  color: white;
+}
+
+/* SIDEBAR */
+.sidebar {
+  width: 220px;
+  height: 100vh;
+  background: #020617;
+  position: fixed;
+  padding: 20px;
+}
+
+.sidebar button {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: none;
+  border: none;
+  color: white;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 8px;
+}
+
+.sidebar button:hover {
+  background: #1e293b;
+}
+
+/* CONTENT */
+.content {
+  margin-left: 240px;
+  padding: 20px;
+}
+
+/* DASHBOARD CARD */
+.dashboard-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.card {
+  background: linear-gradient(145deg,#1e293b,#0f172a);
+  border-radius: 18px;
+  padding: 20px;
+}
+
+.top {
+  display: flex;
+  justify-content: space-between;
+}
+
+.badge {
+  background: #334155;
+  padding: 3px 8px;
+  border-radius: 6px;
+  font-size: 12px;
+}
+
+.badge.orange {
+  background: orange;
+}
+
+.label {
+  font-size: 12px;
+  opacity: 0.6;
+  margin-top: 10px;
+}
+
+.value {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.unit {
+  font-size: 14px;
+  opacity: 0.5;
+}
+
+/* SECTION */
+.section {
+  margin-top: 25px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+}
+
+.lihat {
+  color: #38bdf8;
+  cursor: pointer;
+}
+
+/* TABLE */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  background: #1e293b;
+  border-radius: 10px;
+  margin-top: 10px;
+}
+
+th, td {
+  padding: 10px;
+}
+
+th {
+  background: #2563eb;
+}
+
+/* PAGE */
+.page { display: none; }
+.active { display: block; }
+
+/* MODAL */
+.modal {
+  display: none;
+  position: fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background: rgba(0,0,0,0.7);
+}
+
+.modal-content {
+  background: #0f172a;
+  width: 400px;
+  margin: 60px auto;
+  padding: 20px;
+  border-radius: 12px;
+}
+
+.modal-content input {
+  width: 100%;
+  padding: 10px;
+  margin: 8px 0;
+  background: #1e293b;
+  border: none;
+  border-radius: 6px;
+  color: white;
+}
+
+.modal-content button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  background: #2563eb;
+  border: none;
+  color: white;
+  border-radius: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="sidebar">
+  <button onclick="showPage('dashboard')">📊 Dashboard</button>
+  <button onclick="showPage('sensor')">📡 Sensor Monitor</button>
+  <button onclick="showPage('aktivitas')">📚 Aktivitas</button>
+</div>
+
+<div class="content">
+
+<!-- DASHBOARD -->
+<div id="dashboard" class="page active">
+
+  <h2>Overview Dashboard</h2>
+
+  <div class="dashboard-cards">
+
+    <div class="card">
+      <div class="top">
+        <span>🌡️</span>
+        <span class="badge">DHT22</span>
+      </div>
+      <div class="label">SUHU</div>
+      <div class="value" id="d_temp">-</div>
+      <div class="unit">°C</div>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <span>💧</span>
+        <span class="badge">DHT22</span>
+      </div>
+      <div class="label">KELEMBAPAN</div>
+      <div class="value" id="d_hum">-</div>
+      <div class="unit">%</div>
+    </div>
+
+    <div class="card">
+      <div class="top">
+        <span>☀️</span>
+        <span class="badge orange">BH1750</span>
+      </div>
+      <div class="label">CAHAYA</div>
+      <div class="value" id="d_light">-</div>
+      <div class="unit">lux</div>
+    </div>
+
+    <div class="card">
+      <div class="label">STATUS PERANGKAT</div>
+      <div class="value">esp32-node04</div>
+      <small id="lastUpdate">Update: -</small>
+    </div>
+
+  </div>
+
+  <div class="section">
+    <div class="section-header">
+      <h3>Aktivitas Terakhir</h3>
+      <span class="lihat" onclick="showPage('aktivitas')">Lihat semua →</span>
+    </div>
+    <div id="dashboardAktivitas"></div>
+  </div>
+
+</div>
+
+<!-- SENSOR -->
+<div id="sensor" class="page">
+  <h2>Sensor Monitor</h2>
+
+  <div class="dashboard-cards">
+    <div class="card">
+      🌡️ Suhu
+      <div class="value" id="temp">-</div>
+    </div>
+
+    <div class="card">
+      💧 Kelembapan
+      <div class="value" id="hum">-</div>
+    </div>
+
+    <div class="card">
+      ☀️ Cahaya
+      <div class="value" id="light">-</div>
+    </div>
+  </div>
+</div>
+
+<!-- AKTIVITAS -->
+<div id="aktivitas" class="page">
+  <h2>Aktivitas Kuliah</h2>
+
+  <button onclick="openModal()">+ Tambah Aktivitas</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>No</th>
+        <th>Judul</th>
+        <th>Tanggal</th>
+        <th>Deskripsi</th>
+        <th>Kategori</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+</div>
+
+<!-- MODAL -->
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <h3>Tambah Aktivitas</h3>
+
+    <input id="judul" placeholder="Judul Aktivitas">
+    <input id="tanggal" type="date">
+    <input id="deskripsi" placeholder="Deskripsi">
+    <input id="kategori" placeholder="Kategori">
+
+    <button onclick="tambah()">Simpan</button>
+    <button onclick="closeModal()">Batal</button>
+  </div>
+</div>
+
+<script>
+
+// NAVIGATION
+function showPage(page) {
+  document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+  document.getElementById(page).classList.add("active");
+}
+
+// MODAL
+function openModal() {
+  modal.style.display = "block";
+}
+function closeModal() {
+  modal.style.display = "none";
+}
+
+// SENSOR
+async function loadSensor() {
+  const res = await fetch("http://localhost:3000/sensor");
+  const data = await res.json();
+
+  temp.innerText = data.temperature + " °C";
+  hum.innerText = data.humidity + " %";
+  light.innerText = data.light + " lux";
+
+  d_temp.innerText = data.temperature;
+  d_hum.innerText = data.humidity;
+  d_light.innerText = data.light;
+
+  document.getElementById("lastUpdate").innerText =
+    "Update: " + new Date().toLocaleTimeString();
+}
+
+// AKTIVITAS
+async function loadAktivitas() {
+  const res = await fetch("http://localhost:3000/aktivitas");
+  const data = await res.json();
+
+  const tbody = document.getElementById("tableBody");
+  tbody.innerHTML = "";
+
+  data.forEach((item,i) => {
+    tbody.innerHTML += `
+      <tr>
+        <td>${i+1}</td>
+        <td>${item.judul_aktivitas}</td>
+        <td>${item.tanggal}</td>
+        <td>${item.deskripsi}</td>
+        <td>${item.kategori}</td>
+      </tr>
+    `;
+  });
+
+  const dash = document.getElementById("dashboardAktivitas");
+  dash.innerHTML = "";
+
+  data.slice(-3).reverse().forEach(item => {
+    dash.innerHTML += `
+      <div class="card" style="margin-top:10px;">
+        <b>${item.judul_aktivitas}</b><br>
+        📅 ${item.tanggal}
+      </div>
+    `;
+  });
+}
+
+// TAMBAH
+async function tambah() {
+
+  const judul = document.getElementById("judul").value;
+  const tanggal = document.getElementById("tanggal").value;
+  const deskripsi = document.getElementById("deskripsi").value;
+  const kategori = document.getElementById("kategori").value;
+
+  if (!judul || !tanggal) {
+    alert("Wajib isi judul & tanggal");
+    return;
+  }
+
+  await fetch("http://localhost:3000/aktivitas", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body: JSON.stringify({
+      id: Date.now().toString(),
+      judul_aktivitas: judul,
+      tanggal: tanggal,
+      deskripsi: deskripsi,
+      kategori: kategori
+    })
+  });
+
+  closeModal();
+  loadAktivitas();
+}
+
+// INIT
+setInterval(loadSensor,3000);
+loadSensor();
+loadAktivitas();
+
+</script>
+
+</body>
+</html>
